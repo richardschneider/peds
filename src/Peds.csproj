@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net461</TargetFramework>
+    <!--ApplicationManifest>App.manifest</ApplicationManifest-->
+    <!-- developer build is always 0.2 -->
+    <AssemblyName>peds</AssemblyName>
+    <AssemblyVersion>0.42</AssemblyVersion>
+    <Version>0.42</Version>
+    <Product>Privacy enabled DNS</Product>
+    <Title>Privacy enabled DNS</Title>
+    <Description>Forwards DNS queries to a DNS over TLS server</Description>
+    <Copyright>Copyright © 2018 Richard Schneider</Copyright>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Common.Logging" Version="3.4.1" />
+    <PackageReference Include="Makaretu.Dns" Version="0.11.0" />
+    <PackageReference Include="Makaretu.Dns.Unicast" Version="0.4.0" />
+    <PackageReference Include="System.Net.NetworkInformation" Version="4.3.0" />
+  </ItemGroup>
+
+</Project>
