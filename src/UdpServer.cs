@@ -18,6 +18,7 @@ namespace Makaretu.Dns.Peds
         static ILog log = LogManager.GetLogger(typeof(UdpServer));
 
         ConcurrentDictionary<string, Message> outstandingRequests = new ConcurrentDictionary<string, Message>();
+        List<UdpClient> listeners = new List<UdpClient>();
 
         /// <summary>
         ///   Something that can resolve a DNS query.
@@ -41,6 +42,7 @@ namespace Makaretu.Dns.Peds
             {
                 var endPoint = new IPEndPoint(address, Port);
                 var listener = new UdpClient(endPoint);
+                listeners.Add(listener);
                 ReadRequests(listener);
             }
         }
@@ -59,7 +61,11 @@ namespace Makaretu.Dns.Peds
 
         public void Dispose()
         {
-            // TODO
+            foreach (var listener in listeners)
+            {
+                listener.Dispose();
+            }
+            listeners.Clear();
         }
 
         async void ReadRequests(UdpClient listener)
