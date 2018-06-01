@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Common.Logging;
 using System.Net;
@@ -15,6 +16,8 @@ namespace Makaretu.Dns.Peds
     class UdpServer : IDisposable
     {
         static ILog log = LogManager.GetLogger(typeof(UdpServer));
+
+        ConcurrentDictionary<string, Message> outstandingRequests = new ConcurrentDictionary<string, Message>();
 
         /// <summary>
         ///   Something that can resolve a DNS query.
@@ -84,9 +87,27 @@ namespace Makaretu.Dns.Peds
             try
             {
                 var query = (Message)new Message().Read(request.Buffer);
-                var response = await Resolver.QueryAsync(query);
-                var responseBytes = response.ToByteArray();
-                await listener.SendAsync(responseBytes, responseBytes.Length, request.RemoteEndPoint);
+
+                // Check for a duplicate request.
+                var qid = query.Id.ToString() + "-" + request.RemoteEndPoint.ToString();
+                if (!outstandingRequests.TryAdd(qid, query))
+                    return;
+
+                try
+                {
+                    // Need a unique query ID
+                    var originalQueryId = query.Id;
+                    query.Id = Resolver.NextQueryId();
+
+                    var response = await Resolver.QueryAsync(query);
+                    response.Id = originalQueryId;
+                    var responseBytes = response.ToByteArray();
+                    await listener.SendAsync(responseBytes, responseBytes.Length, request.RemoteEndPoint);
+                }
+                finally
+                {
+                    outstandingRequests.TryRemove(qid, out Message _);
+                }
             }
             catch (Exception e)
             {
