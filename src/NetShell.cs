@@ -52,6 +52,10 @@ namespace Makaretu.Dns.Peds
             primary = true;
             foreach (var addr in addrs)
             {
+                // netsh does not accept scope ID
+                // https://github.com/richardschneider/peds/issues/6
+                addr.ScopeId = 0;
+
                 if (primary)
                 {
                     Run($"interface ipv6 delete dns {qname} all");
