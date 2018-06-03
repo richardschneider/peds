@@ -77,6 +77,10 @@ namespace Makaretu.Dns.Peds
                     var request = await listener.ReceiveAsync();
                     Process(request, listener);
                 }
+                catch (ObjectDisposedException)
+                {
+                    return;
+                }
                 catch (SocketException e) when (e.SocketErrorCode == SocketError.ConnectionReset)
                 {
                     // eat it.
@@ -92,6 +96,14 @@ namespace Makaretu.Dns.Peds
         {
             try
             {
+                long startTime = 0;
+                long endTime = 0;
+                if (Performance.Instance.Enabled)
+                {
+                    Performance.QueryPerformanceCounter(ref startTime);
+                    Performance.Instance.RequestCount.Increment();
+                    Performance.Instance.RequestCountPerSecond.Increment();
+                }
                 var query = (Message)new Message().Read(request.Buffer);
 
                 // Check for a duplicate request.
@@ -105,8 +117,16 @@ namespace Makaretu.Dns.Peds
                     var originalQueryId = query.Id;
                     query.Id = Resolver.NextQueryId();
 
+                    // Get a response.
                     var response = await Resolver.QueryAsync(query);
                     response.Id = originalQueryId;
+                    if (Performance.Instance.Enabled)
+                    {
+                        Performance.QueryPerformanceCounter(ref endTime);
+                        Performance.Instance.AvgResolveTime.IncrementBy(endTime - startTime);
+                        Performance.Instance.AvgResolveTimeBase.Increment();
+                    }
+
                     var responseBytes = response.ToByteArray();
                     await listener.SendAsync(responseBytes, responseBytes.Length, request.RemoteEndPoint);
                 }
