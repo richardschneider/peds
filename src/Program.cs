@@ -48,6 +48,8 @@ namespace Makaretu.Dns.Peds
 
         void Start()
         {
+            var _ = Performance.Instance.Enabled;
+
             var resolver = new DotClient
             {
                 ThrowResponseError = false

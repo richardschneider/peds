@@ -12,12 +12,13 @@
     <Title>Privacy enabled DNS</Title>
     <Description>Forwards DNS queries to a DNS over TLS server</Description>
     <Copyright>Copyright © 2018 Richard Schneider</Copyright>
+    <RootNamespace>Makaretu.Dns.Peds</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Common.Logging" Version="3.4.1" />
     <PackageReference Include="Makaretu.Dns" Version="0.11.0" />
-    <PackageReference Include="Makaretu.Dns.Unicast" Version="0.4.0" />
+    <PackageReference Include="Makaretu.Dns.Unicast" Version="0.4.1" />
   </ItemGroup>
 
 </Project>
